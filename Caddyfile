@@ -1,6 +1,5 @@
 {$DOMAIN_NAME} {
-    route /portainer* {
-        uri strip_prefix /portainer
+    handle_path /portainer* {
         reverse_proxy portainer:9000
     }
 }
