@@ -1,35 +1,42 @@
-version: '3.8'
+version: '3'
 
 services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    networks:
+      - proxy
+    command: --admin-password-file /data/password_file
+
   caddy:
-    image: caddy:latest
+    image: caddy:2
+    container_name: caddy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
-    env_file:
-      - .env
+      - caddy_config:/config
     networks:
-      - my_network
-
-  portainer:
-    image: portainer/portainer-ce:latest
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    # This command tells Portainer to use the /portainer subpath.
-    command: -H unix:///var/run/docker.sock --base-url /portainer
-    networks:
-      - my_network
+      - proxy
+    depends_on:
+      - portainer
 
 networks:
-  my_network:
-    external: false
+  proxy:
+    driver: bridge
 
 volumes:
-  caddy_data: {}
-  portainer_data: {}
+  portainer_data:
+  caddy_data:
+  caddy_config:
