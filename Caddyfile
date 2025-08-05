@@ -1,15 +1,6 @@
-# This Caddyfile uses environment variables.
-# Ensure DOMAIN_NAME is set in your .env file.
+{$DOMAIN_NAME}
 
-{$DOMAIN_NAME} {
-    # Handle requests for Portainer under the /portainer/ path
-    handle /portainer* {
-        # Reverse proxy to the Portainer service container
-        reverse_proxy portainer:9000
-    }
-
-    # You can add other services here if needed
-    # handle /other-service* {
-    #   reverse_proxy other-service:8080
-    # }
+proxy /portainer portainer:9000 {
+    without /portainer
+    transparent
 }
