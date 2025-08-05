@@ -8,7 +8,7 @@
         format console
     }
 
-    # Handle /portainer path - improved path handling
+    # Handle /portainer path
     handle /portainer* {
         uri strip_prefix /portainer
         reverse_proxy portainer:9000 {
