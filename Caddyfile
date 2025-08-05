@@ -1,33 +1,26 @@
-# Caddyfile
-# Use the MY_DOMAIN environment variable, which will be set via docker-compose
-# This block defines the site Caddy will serve and manage SSL for.
-{$MY_DOMAIN} {
-    # Enable automatic HTTPS for the domain
-    tls {$MY_DOMAIN}
+# Use the DOMAIN environment variable for the site block
+${DOMAIN} {
+    # Enable automatic HTTPS. Caddy will automatically obtain and renew SSL certificates.
+    # If you're behind a strict firewall or using a DNS provider that supports DNS challenges,
+    # you might need to specify a DNS provider here (e.g., tls { dns cloudflare }).
+    # For most VPS setups with open 80/443, the default HTTP-01 challenge works fine.
+    tls
 
-    # Define a custom path for Portainer.
-    # This 'handle_path' directive will match any request starting with /portainer
-    handle_path /portainer* {
-        # Strip the /portainer prefix before forwarding the request to the backend.
-        # This is crucial because Portainer expects to be served from the root path.
-        uri strip_prefix /portainer
-        # Reverse proxy requests to the 'portainer' service on its default port 9000.
-        # 'portainer' is the service name defined in docker-compose.yml,
-        # which Docker's internal DNS resolves to the container's IP.
-        reverse_proxy portainer:9000
+    # Handle requests for the custom web path /portainer and its subpaths.
+    # This will reverse proxy all requests starting with /portainer to the Portainer container.
+    handle /portainer* {
+        reverse_proxy portainer:9000 # Proxies requests to the Portainer container on port 9000
     }
 
-    # Optional: You can add other configurations here, like logging,
-    # or other handle_path blocks for different services on different paths.
-    # For example:
-    # handle_path /my-other-app* {
-    #     uri strip_prefix /my-other-app
-    #     reverse_proxy my-other-app-service:8080
+    # Redirect the root path (yourdomain.com) to the custom Portainer path (yourdomain.com/portainer).
+    # This makes it so users automatically land on the Portainer login page when they visit your domain.
+    handle / {
+        redir /portainer 302 # Redirects with a 302 (Found) status code
+    }
+
+    # Optional: Enable access logs for debugging
+    # log {
+    #     output stdout
+    #     format json
     # }
-
-    # Enable access logging (optional, but good for debugging)
-    log {
-        output stdout
-        format json
-    }
 }
