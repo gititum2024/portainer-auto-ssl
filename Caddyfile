@@ -1,9 +1,9 @@
 {$DOMAIN} {
-  route /portainer* {
-    reverse_proxy portainer:9000 {
-      header_up Host {http.request.host}
-      header_up Upgrade {http.request.header.Upgrade}
-      header_up Connection {http.request.header.Connection}
-    }
+  # This block handles all requests to /portainer and its sub-paths
+  handle /portainer* {
+    # Rewrite the URL to remove /portainer before proxying
+    # This is crucial for Portainer to work correctly
+    rewrite * {uri} /portainer
+    reverse_proxy portainer:9000
   }
 }
