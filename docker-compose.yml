@@ -1,39 +1,55 @@
+# docker-compose.yml
 version: '3.8'
 
 services:
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
-    restart: unless-stopped
-    # This command tells Portainer to generate all its links with the /portainer prefix.
-    command: --base-url /portainer
+    # Mount the Docker socket to allow Portainer to manage Docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      # Persistent storage for Portainer data
       - portainer_data:/data
+    restart: unless-stopped
+    # Connect Portainer to the same network as Caddy
     networks:
-      - caddy_net
+      - webproxy_network
 
   caddy:
     image: caddy:latest
     container_name: caddy
-    restart: unless-stopped
+    # Map ports 80 (HTTP) and 443 (HTTPS) from the host to the Caddy container
     ports:
       - "80:80"
       - "443:443"
+      # Optional: For HTTP/3 (QUIC) support
+      - "443:443/udp"
+    # Capabilities needed for Caddy to manage network interfaces and bind to low ports
+    cap_add:
+      - NET_ADMIN
+    # Mount the Caddyfile and persistent storage for Caddy's data and configuration
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - caddy_net
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro # Read-only mount for the Caddyfile
+      - caddy_data:/data # Persistent storage for Caddy's certificates
+      - caddy_config:/config # Persistent storage for Caddy's configuration
+    restart: unless-stopped
+    # Pass the domain name as an environment variable to Caddy
     environment:
-      - DOMAIN_NAME=${DOMAIN_NAME}
+      - MY_DOMAIN=${YOUR_DOMAIN} # This will be read from your .env file
+    # Ensure Caddy starts after Portainer (though Caddy will handle retries if Portainer isn't ready)
+    depends_on:
+      - portainer
+    # Connect Caddy to the same network as Portainer
+    networks:
+      - webproxy_network
 
+# Define named volumes for persistent data
 volumes:
   portainer_data:
   caddy_data:
   caddy_config:
 
+# Define a custom bridge network for services to communicate securely
 networks:
-  caddy_net:
+  webproxy_network:
     driver: bridge
