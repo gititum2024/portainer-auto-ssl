@@ -1,55 +1,32 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
+  # Portainer service definition
   portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    # Mount the Docker socket to allow Portainer to manage Docker
+    image: portainer/portainer-ce:latest # Uses the latest Portainer Community Edition image
+    container_name: portainer # Assigns a fixed name to the container
+    restart: unless-stopped # Ensures the container restarts automatically unless explicitly stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      # Persistent storage for Portainer data
-      - portainer_data:/data
-    restart: unless-stopped
-    # Connect Portainer to the same network as Caddy
-    networks:
-      - webproxy_network
+      - /var/run/docker.sock:/var/run/docker.sock # Mounts the Docker socket for Portainer to manage Docker
+      - portainer_data:/data # Mounts a named volume to persist Portainer's data
 
+  # Caddy reverse proxy service definition
   caddy:
-    image: caddy:latest
-    container_name: caddy
-    # Map ports 80 (HTTP) and 443 (HTTPS) from the host to the Caddy container
+    image: caddy:latest # Uses the latest Caddy web server image
+    container_name: caddy # Assigns a fixed name to the container
+    restart: unless-stopped # Ensures the container restarts automatically unless explicitly stopped
     ports:
-      - "80:80"
-      - "443:443"
-      # Optional: For HTTP/3 (QUIC) support
-      - "443:443/udp"
-    # Capabilities needed for Caddy to manage network interfaces and bind to low ports
-    cap_add:
-      - NET_ADMIN
-    # Mount the Caddyfile and persistent storage for Caddy's data and configuration
+      - "80:80" # Maps host port 80 to container port 80 (for HTTP and ACME challenge)
+      - "443:443" # Maps host port 443 to container port 443 (for HTTPS)
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro # Read-only mount for the Caddyfile
-      - caddy_data:/data # Persistent storage for Caddy's certificates
-      - caddy_config:/config # Persistent storage for Caddy's configuration
-    restart: unless-stopped
-    # Pass the domain name as an environment variable to Caddy
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro # Mounts your local Caddyfile into the container as read-only
+      - caddy_data:/data # Mounts a named volume to persist Caddy's data (e.g., SSL certificates)
     environment:
-      - MY_DOMAIN=${YOUR_DOMAIN} # This will be read from your .env file
-    # Ensure Caddy starts after Portainer (though Caddy will handle retries if Portainer isn't ready)
+      - DOMAIN=${PORTAINER_DOMAIN} # Passes the domain name from the .env file to Caddy
     depends_on:
-      - portainer
-    # Connect Caddy to the same network as Portainer
-    networks:
-      - webproxy_network
+      - portainer # Ensures Caddy starts only after the Portainer service is up
 
-# Define named volumes for persistent data
+# Named volumes for data persistence
 volumes:
-  portainer_data:
-  caddy_data:
-  caddy_config:
-
-# Define a custom bridge network for services to communicate securely
-networks:
-  webproxy_network:
-    driver: bridge
+  portainer_data: # Volume for Portainer application data
+  caddy_data: # Volume for Caddy's certificates and other data
