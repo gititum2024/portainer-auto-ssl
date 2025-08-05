@@ -4,6 +4,10 @@
     # Strips the /portainer prefix from the URI before proxying
     uri strip_prefix /portainer
     # Proxy all traffic to the Portainer service on its default port
-    reverse_proxy portainer:9000
+    reverse_proxy portainer:9000 {
+      # Pass through essential headers for WebSockets
+      header_up Upgrade {http.request.header.Upgrade}
+      header_up Connection {http.request.header.Connection}
+    }
   }
 }
