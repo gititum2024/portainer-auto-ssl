@@ -21,7 +21,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-    # This is the most reliable way to tell Portainer to use a base URL
+    # This command is the most reliable way to set the base URL
     command: -H unix:///var/run/docker.sock --base-url /portainer
     networks:
       - my_network
