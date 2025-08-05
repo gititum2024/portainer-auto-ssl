@@ -1,9 +1,6 @@
 {$DOMAIN} {
-  # This block handles all requests to /portainer and its sub-paths
   handle /portainer* {
-    # Rewrite the URL to remove /portainer before proxying
-    # This is crucial for Portainer to work correctly
-    rewrite * {uri} /portainer
+    uri strip_prefix /portainer
     reverse_proxy portainer:9000
   }
 }
