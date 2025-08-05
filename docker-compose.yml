@@ -12,14 +12,13 @@ services:
       - portainer_data:/data
     networks:
       - proxy
-    environment:
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-    command: --admin-password=${ADMIN_PASSWORD:-admin} --hide-label=owner --base-url=/portainer
+    # Fixed command syntax
+    command: --base-url=/portainer
     expose:
       - 9000
 
   caddy:
-    image: caddy:2    # This line was probably missing in your file
+    image: caddy:2
     container_name: caddy
     restart: unless-stopped
     ports:
