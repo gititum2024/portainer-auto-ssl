@@ -1,11 +1,14 @@
 {$DOMAIN} {
-  # This block handles all requests to /portainer and its sub-paths
-  handle /portainer* {
-    # Strips the /portainer prefix from the URI before proxying
+  # This route handles all requests to the /portainer subpath.
+  route /portainer* {
+    # First, rewrite the path to strip the /portainer prefix.
+    # This ensures Portainer receives the path it expects.
     uri strip_prefix /portainer
-    # Proxy all traffic to the Portainer service on its default port
+
+    # Then, proxy the request to the Portainer service.
     reverse_proxy portainer:9000 {
-      # Pass through essential headers for WebSockets
+      # Pass crucial headers for WebSocket connections, which are
+      # essential for Portainer's real-time functionality.
       header_up Upgrade {http.request.header.Upgrade}
       header_up Connection {http.request.header.Connection}
     }
