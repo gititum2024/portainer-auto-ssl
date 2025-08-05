@@ -1,32 +1,33 @@
 version: '3.8'
 
 services:
-  # Portainer service definition
-  portainer:
-    image: portainer/portainer-ce:latest # Uses the latest Portainer Community Edition image
-    container_name: portainer # Assigns a fixed name to the container
-    restart: unless-stopped # Ensures the container restarts automatically unless explicitly stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Mounts the Docker socket for Portainer to manage Docker
-      - portainer_data:/data # Mounts a named volume to persist Portainer's data
-
-  # Caddy reverse proxy service definition
   caddy:
-    image: caddy:latest # Uses the latest Caddy web server image
-    container_name: caddy # Assigns a fixed name to the container
-    restart: unless-stopped # Ensures the container restarts automatically unless explicitly stopped
+    image: caddy:latest
+    restart: unless-stopped
     ports:
-      - "80:80" # Maps host port 80 to container port 80 (for HTTP and ACME challenge)
-      - "443:443" # Maps host port 443 to container port 443 (for HTTPS)
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro # Mounts your local Caddyfile into the container as read-only
-      - caddy_data:/data # Mounts a named volume to persist Caddy's data (e.g., SSL certificates)
-    environment:
-      - DOMAIN=${PORTAINER_DOMAIN} # Passes the domain name from the .env file to Caddy
-    depends_on:
-      - portainer # Ensures Caddy starts only after the Portainer service is up
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    env_file:
+      - .env
+    networks:
+      - my_network
 
-# Named volumes for data persistence
+  portainer:
+    image: portainer/portainer-ce:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    external: false
+
 volumes:
-  portainer_data: # Volume for Portainer application data
-  caddy_data: # Volume for Caddy's certificates and other data
+  caddy_data: {}
+  portainer_data: {}
