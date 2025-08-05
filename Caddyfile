@@ -1,3 +1,6 @@
-your_domain.com {
-    reverse_proxy portainer:9000
+{$DOMAIN_NAME} {
+    route /portainer* {
+        uri strip_prefix /portainer
+        reverse_proxy portainer:9000
+    }
 }
