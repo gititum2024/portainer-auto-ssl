@@ -1,9 +1,20 @@
+{
+    email admin@{$DOMAIN}
+}
+
 {$DOMAIN} {
-  # This block handles all requests to /portainer and its sub-paths.
-  handle /portainer* {
-    # Strips the /portainer prefix from the URI before proxying.
-    uri strip_prefix /portainer
-    # Proxy all traffic to the Portainer service on its default port.
-    reverse_proxy portainer:9000
-  }
+    log {
+        output file /data/access.log
+        format console
+    }
+
+    # Handle /portainer path
+    handle /portainer* {
+        reverse_proxy portainer:9000
+    }
+
+    # Handle other paths
+    handle {
+        respond "Portainer is available at /portainer"
+    }
 }
