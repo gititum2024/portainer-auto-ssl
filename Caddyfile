@@ -1,8 +1,33 @@
-{$DOMAIN_NAME} {
-    handle_path /portainer/* {
+# Caddyfile
+# Use the MY_DOMAIN environment variable, which will be set via docker-compose
+# This block defines the site Caddy will serve and manage SSL for.
+{$MY_DOMAIN} {
+    # Enable automatic HTTPS for the domain
+    tls {$MY_DOMAIN}
+
+    # Define a custom path for Portainer.
+    # This 'handle_path' directive will match any request starting with /portainer
+    handle_path /portainer* {
+        # Strip the /portainer prefix before forwarding the request to the backend.
+        # This is crucial because Portainer expects to be served from the root path.
         uri strip_prefix /portainer
+        # Reverse proxy requests to the 'portainer' service on its default port 9000.
+        # 'portainer' is the service name defined in docker-compose.yml,
+        # which Docker's internal DNS resolves to the container's IP.
         reverse_proxy portainer:9000
     }
 
-    # You can add other services here as well
+    # Optional: You can add other configurations here, like logging,
+    # or other handle_path blocks for different services on different paths.
+    # For example:
+    # handle_path /my-other-app* {
+    #     uri strip_prefix /my-other-app
+    #     reverse_proxy my-other-app-service:8080
+    # }
+
+    # Enable access logging (optional, but good for debugging)
+    log {
+        output stdout
+        format json
+    }
 }
