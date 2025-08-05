@@ -21,7 +21,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-    command: -H unix:///var/run/docker.sock --base-url /portainer
+    environment:
+      # This tells Portainer to use a specific base URL
+      - PUBLIC_URL=/portainer
     networks:
       - my_network
 
