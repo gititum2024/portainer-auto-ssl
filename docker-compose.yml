@@ -1,8 +1,19 @@
 version: '3.8'
 
 services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - caddy_net
+
   caddy:
-    image: caddy:2-alpine  # Use an explicit Caddy v2 tag
+    image: caddy:latest
+    container_name: caddy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -12,22 +23,15 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     networks:
-      - portainer_net
-
-  portainer:
-    image: portainer/portainer-ce:latest
-    restart: unless-stopped
-    command: -H unix:///var/run/docker.sock --base-url /portainer
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    networks:
-      - portainer_net
-
-networks:
-  portainer_net:
+      - caddy_net
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
 
 volumes:
+  portainer_data:
   caddy_data:
   caddy_config:
-  portainer_data:
+
+networks:
+  caddy_net:
+    driver: bridge
