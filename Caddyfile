@@ -1,6 +1,10 @@
-{$DOMAIN_NAME}
-
-proxy /portainer portainer:9000 {
-    without /portainer
-    transparent
+{$DOMAIN_NAME} {
+    # Match requests to /portainer and any sub-path
+    route /portainer* {
+        # Strip the /portainer prefix from the request URI
+        uri strip_prefix /portainer
+        
+        # Reverse proxy the request to the Portainer service
+        reverse_proxy portainer:9000
+    }
 }
