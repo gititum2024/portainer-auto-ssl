@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   caddy:
-    image: caddy:latest
+    image: caddy:2-alpine  # Use an explicit Caddy v2 tag
     restart: unless-stopped
     ports:
       - "80:80"
@@ -13,8 +13,6 @@ services:
       - caddy_config:/config
     networks:
       - portainer_net
-    # The DOMAIN_NAME from the .env file is automatically passed to the container
-    # by Docker Compose, making it available to Caddy.
 
   portainer:
     image: portainer/portainer-ce:latest
