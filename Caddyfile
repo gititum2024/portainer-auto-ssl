@@ -1,6 +1,15 @@
 {$DOMAIN} {
+  # Handles all requests to /portainer*
   handle /portainer* {
+    # Strips the /portainer prefix from the URI before proxying
     uri strip_prefix /portainer
-    reverse_proxy portainer:9000
+    # Proxy to the Portainer service
+    reverse_proxy portainer:9000 {
+      # Pass through necessary headers for WebSockets
+      header_up Host {http.request.host}
+      header_up X-Forwarded-For {http.request.remote}
+      header_up X-Forwarded-Proto {http.request.scheme}
+      header_up X-Forwarded-Host {http.request.host}
+    }
   }
 }
