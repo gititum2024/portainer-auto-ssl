@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   portainer:
@@ -12,7 +12,13 @@ services:
       - portainer_data:/data
     networks:
       - proxy
-    command: --admin-password-file /data/password_file
+    environment:
+      # You can set the initial admin password here
+      # Comment this out after first run
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    # Use the standard port
+    expose:
+      - 9000
 
   caddy:
     image: caddy:2
