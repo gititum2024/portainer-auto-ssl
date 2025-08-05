@@ -1,26 +1,5 @@
-# Use the DOMAIN environment variable for the site block
-${DOMAIN} {
-    # Enable automatic HTTPS. Caddy will automatically obtain and renew SSL certificates.
-    # If you're behind a strict firewall or using a DNS provider that supports DNS challenges,
-    # you might need to specify a DNS provider here (e.g., tls { dns cloudflare }).
-    # For most VPS setups with open 80/443, the default HTTP-01 challenge works fine.
-    tls
-
-    # Handle requests for the custom web path /portainer and its subpaths.
-    # This will reverse proxy all requests starting with /portainer to the Portainer container.
-    handle /portainer* {
-        reverse_proxy portainer:9000 # Proxies requests to the Portainer container on port 9000
-    }
-
-    # Redirect the root path (yourdomain.com) to the custom Portainer path (yourdomain.com/portainer).
-    # This makes it so users automatically land on the Portainer login page when they visit your domain.
-    handle / {
-        redir /portainer 302 # Redirects with a 302 (Found) status code
-    }
-
-    # Optional: Enable access logs for debugging
-    # log {
-    #     output stdout
-    #     format json
-    # }
+{$DOMAIN} {
+  handle_path /portainer/* {
+    reverse_proxy portainer:9000
+  }
 }
