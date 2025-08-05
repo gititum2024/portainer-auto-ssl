@@ -22,7 +22,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     environment:
-      # This tells Portainer to use a specific base URL
+      # This is the official and correct way to set the base URL for Portainer
       - PUBLIC_URL=/portainer
     networks:
       - my_network
