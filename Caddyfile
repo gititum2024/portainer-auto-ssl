@@ -1,6 +1,18 @@
 {$DOMAIN} {
+  # This block handles all requests to /portainer
+  # It explicitly proxies to the Portainer container
+  # and ensures headers are correctly forwarded for SSL and host.
+  # The trailing slash in the proxy_pass is crucial for sub-path routing.
   route /portainer* {
-    uri strip_prefix /portainer
-    reverse_proxy portainer:9000
+    # Set the Host header to the correct destination
+    # This is often needed by the application server
+    header_up Host {http.request.host}
+
+    # Proxy to Portainer container
+    reverse_proxy portainer:9000 {
+      # This is crucial for WebSocket connections
+      header_up Upgrade {http.request.header.Upgrade}
+      header_up Connection {http.request.header.Connection}
+    }
   }
 }
