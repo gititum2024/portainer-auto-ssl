@@ -14,11 +14,33 @@ services:
       - proxy
     environment:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-    # Add this command to set the base URL
-    command: --admin-password=${ADMIN_PASSWORD:-admin} --hide-label=owner --logo="https://portainer.io/img/logo.svg" --base-url=/portainer
+    command: --admin-password=${ADMIN_PASSWORD:-admin} --hide-label=owner --base-url=/portainer
     expose:
       - 9000
 
   caddy:
-    # Rest of your caddy configuration remains the same
-    # ...
+    image: caddy:2    # This line was probably missing in your file
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - proxy
+    depends_on:
+      - portainer
+
+networks:
+  proxy:
+    driver: bridge
+
+volumes:
+  portainer_data:
+  caddy_data:
+  caddy_config:
