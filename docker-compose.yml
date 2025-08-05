@@ -13,11 +13,13 @@ services:
       - caddy_config:/config
     networks:
       - portainer_net
+    # The DOMAIN_NAME from the .env file is automatically passed to the container
+    # by Docker Compose, making it available to Caddy.
 
   portainer:
     image: portainer/portainer-ce:latest
     restart: unless-stopped
-    command: -H unix:///var/run/docker.sock
+    command: -H unix:///var/run/docker.sock --base-url /portainer
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
