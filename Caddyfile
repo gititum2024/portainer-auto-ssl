@@ -1,16 +1,6 @@
 {$DOMAIN} {
-  # This route handles all requests to the /portainer subpath.
-  route /portainer* {
-    # First, rewrite the path to strip the /portainer prefix.
-    # This ensures Portainer receives the path it expects.
+  handle /portainer* {
     uri strip_prefix /portainer
-
-    # Then, proxy the request to the Portainer service.
-    reverse_proxy portainer:9000 {
-      # Pass crucial headers for WebSocket connections, which are
-      # essential for Portainer's real-time functionality.
-      header_up Upgrade {http.request.header.Upgrade}
-      header_up Connection {http.request.header.Connection}
-    }
+    reverse_proxy localhost:9000
   }
 }
