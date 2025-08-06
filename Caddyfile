@@ -1,0 +1,15 @@
+{$DOMAIN} {
+    # Global settings
+    encode gzip
+    
+    # Portainer reverse proxy with path rewriting
+    handle /portainer/* {
+        reverse_proxy portainer:9000 {
+            header_up X-Forwarded-Prefix /portainer
+            header_up X-Real-IP {remote_host}
+        }
+    }
+    
+    # Redirect root to /portainer
+    redir / /portainer 301
+}
