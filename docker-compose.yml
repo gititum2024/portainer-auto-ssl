@@ -12,7 +12,7 @@ services:
       - portainer-network
 
   caddy:
-    image: caddy:2.7.5-alpine
+    image: caddy:latest
     restart: unless-stopped
     ports:
       - "80:80"
