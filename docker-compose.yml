@@ -7,14 +7,13 @@ services:
     command: -H unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./portainer_data:/data
+      - portainer_data:/data
     networks:
       - portainer-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/api/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    labels:
+      caddy.reverse_proxy: "portainer:9000"
+      caddy.rewrite: "/portainer{path} /{path}"
+      caddy.handle_path: "/portainer/*"
 
   caddy:
     image: caddy:latest
@@ -22,16 +21,20 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./caddy_data:/data
-      - ./caddy_config:/config
-    depends_on:
-      portainer:
-        condition: service_healthy
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - CADDY_DOMAIN=${DOMAIN}
     networks:
       - portainer-network
 
 networks:
   portainer-network:
     driver: bridge
+
+volumes:
+  portainer_data:
+  caddy_data:
+  caddy_config:
