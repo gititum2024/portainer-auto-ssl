@@ -4,14 +4,12 @@ services:
   portainer:
     image: portainer/portainer-ce:latest
     restart: unless-stopped
-    command: --http-disabled
+    command: -H unix:///var/run/docker.sock
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
+      - ${DOCKER_HOST}:/var/run/docker.sock
+      - ./data:/data
     networks:
-      - caddy_net
-    environment:
-      - PORTAINER_HTTP_DISABLED=true
+      - portainer-network
 
   caddy:
     image: caddy:latest
@@ -21,17 +19,11 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    environment:
-      - DOMAIN=${DOMAIN}
+      - ./caddy_data:/data
+      - ./caddy_config:/config
     networks:
-      - caddy_net
-
-volumes:
-  portainer_data:
-  caddy_data:
-  caddy_config:
+      - portainer-network
 
 networks:
-  caddy_net:
+  portainer-network:
+    driver: bridge
