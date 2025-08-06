@@ -2,20 +2,18 @@ version: '3.8'
 
 services:
   portainer:
-    image: portainer/portainer-ce:latest
+    image: portainer/portainer-ce:${PORTAINER_TAG}
     container_name: portainer
     restart: unless-stopped
     command: -H unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-    environment:
-      - ADMIN_PASSWORD=${PORTAINER_PASSWORD}
     networks:
-      - caddy_network
+      - caddy
 
   caddy:
-    image: caddy:latest
+    image: caddy:${CADDY_TAG}
     container_name: caddy
     restart: unless-stopped
     ports:
@@ -26,14 +24,14 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     environment:
-      - DOMAIN=${DOMAIN}
+      - DOMAIN
     networks:
-      - caddy_network
-
-networks:
-  caddy_network:
+      - caddy
 
 volumes:
   portainer_data:
   caddy_data:
   caddy_config:
+
+networks:
+  caddy:
