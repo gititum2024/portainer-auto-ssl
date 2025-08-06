@@ -3,43 +3,41 @@ version: '3.8'
 services:
   portainer:
     image: portainer/portainer-ce:latest
-    container_name: portainer
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    environment:
+      - VIRTUAL_HOST=${DOMAIN}
+      - VIRTUAL_PATH=/portainer
     networks:
-      - proxy
-    # Fixed command syntax
-    command: --base-url=/portainer
-    expose:
-      - 9000
+      - caddy_net
 
   caddy:
-    image: caddy:2
-    container_name: caddy
+    image: caddy:latest
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-    environment:
-      - DOMAIN=${DOMAIN}
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN}
     networks:
-      - proxy
-    depends_on:
-      - portainer
-
-networks:
-  proxy:
-    driver: bridge
+      - caddy_net
+    command: [
+      "caddy", "reverse-proxy",
+      "--from", "${DOMAIN}",
+      "--to", "portainer:9000",
+      "--change-host-header",
+      "--internal-certs"
+    ]
 
 volumes:
   portainer_data:
   caddy_data:
   caddy_config:
+
+networks:
+  caddy_net:
