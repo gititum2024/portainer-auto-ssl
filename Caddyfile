@@ -1,12 +1,13 @@
 {$DOMAIN} {
-    # Portainer reverse proxy with path rewriting
-    handle /portainer/* {
+    # Handle root path redirect first
+    @root path /
+    redir @root /portainer 301
+
+    # Portainer reverse proxy
+    route /portainer/* {
         reverse_proxy portainer:9000 {
             header_up X-Forwarded-Prefix /portainer
-            header_up X-Real-IP {remote_host}
+            header_up X-Real-IP {remote}
         }
     }
-    
-    # Redirect root to /portainer
-    redir / /portainer 301
 }
