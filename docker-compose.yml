@@ -4,11 +4,16 @@ services:
   portainer:
     image: portainer/portainer-ce:latest
     restart: unless-stopped
+    command: --sslcert /data/certs/portainer.crt --sslkey /data/certs/portainer.key
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     networks:
       - caddy_net
+    environment:
+      - PORTAINER_HTTP_DISABLED=true
+      - PORTAINER_SSL_CERT_PATH=/data/certs/portainer.crt
+      - PORTAINER_SSL_KEY_PATH=/data/certs/portainer.key
 
   caddy:
     image: caddy:latest
