@@ -10,23 +10,20 @@ services:
       - portainer_data:/data
     networks:
       - portainer-network
-    labels:
-      caddy.reverse_proxy: "portainer:9000"
-      caddy.rewrite: "/portainer{path} /{path}"
-      caddy.handle_path: "/portainer/*"
+    environment:
+      - VIRTUAL_HOST=${DOMAIN}
+      - VIRTUAL_PATH=/portainer
 
   caddy:
-    image: caddy:latest
+    image: caddy:2.7.5
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
     volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    environment:
-      - CADDY_DOMAIN=${DOMAIN}
     networks:
       - portainer-network
 
