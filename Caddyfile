@@ -1,13 +1,13 @@
 {$DOMAIN} {
-    encode gzip
-
-    # Portainer reverse proxy
-    handle_path /portainer/* {
-        reverse_proxy portainer:9000
+    # Handle Portainer UI and API
+    handle /portainer/* {
+        reverse_proxy portainer:9000 {
+            header_up X-Real-IP {remote_host}
+        }
     }
 
-    # Redirect root to Portainer
+    # Redirect root to /portainer
     handle {
-        redir /portainer{uri}
+        redir /portainer
     }
 }
