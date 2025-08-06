@@ -7,9 +7,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-    environment:
-      - VIRTUAL_HOST=${DOMAIN}
-      - VIRTUAL_PATH=/portainer
     networks:
       - caddy_net
 
@@ -20,19 +17,13 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     environment:
       - DOMAIN=${DOMAIN}
     networks:
       - caddy_net
-    command: [
-      "caddy", "reverse-proxy",
-      "--from", "${DOMAIN}",
-      "--to", "portainer:9000",
-      "--change-host-header",
-      "--internal-certs"
-    ]
 
 volumes:
   portainer_data:
