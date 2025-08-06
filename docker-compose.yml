@@ -10,12 +10,9 @@ services:
       - portainer_data:/data
     networks:
       - portainer-network
-    environment:
-      - VIRTUAL_HOST=${DOMAIN}
-      - VIRTUAL_PATH=/portainer
 
   caddy:
-    image: caddy:2.7.5
+    image: caddy:2.7.5-alpine
     restart: unless-stopped
     ports:
       - "80:80"
