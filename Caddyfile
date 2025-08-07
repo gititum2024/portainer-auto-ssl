@@ -2,11 +2,16 @@
     # TLS/HTTPS is automatic
     tls {$EMAIL}
 
-    handle_path /portainer/* {
+    # Handle /portainer path
+    handle /portainer/* {
         reverse_proxy portainer:9000 {
+            # Proper path handling
+            rewrite * /{path} 
             header_up X-Forwarded-Prefix /portainer
+            header_up X-Forwarded-Proto {scheme}
         }
     }
 
-    redir / /portainer{uri}
+    # Redirect root to /portainer
+    redir / /portainer 301
 }
