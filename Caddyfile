@@ -3,10 +3,9 @@
     tls {$EMAIL}
 
     # Handle /portainer path
-    handle /portainer/* {
+    route /portainer/* {
+        rewrite * /{path} 
         reverse_proxy portainer:9000 {
-            # Proper path handling
-            rewrite * /{path} 
             header_up X-Forwarded-Prefix /portainer
             header_up X-Forwarded-Proto {scheme}
         }
