@@ -2,36 +2,38 @@ version: '3.8'
 
 services:
   portainer:
-    image: portainer/portainer-ce:${PORTAINER_TAG}
+    image: portainer/portainer-ce:latest
     container_name: portainer
     restart: unless-stopped
-    command: -H unix:///var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     networks:
-      - caddy
+      - portainer-network
 
   caddy:
-    image: caddy:${CADDY_TAG}
-    container_name: caddy
+    image: caddy:latest
+    container_name: portainer-caddy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - ./caddy_data:/data
+      - ./caddy_config:/config
     environment:
-      - DOMAIN
+      - DOMAIN=${DOMAIN:-portainer.example.com}  # Default value if .env not set
+      - EMAIL=${EMAIL:-admin@example.com}        # For Let's Encrypt
     networks:
-      - caddy
+      - portainer-network
+
+networks:
+  portainer-network:
+    driver: bridge
 
 volumes:
   portainer_data:
   caddy_data:
   caddy_config:
-
-networks:
-  caddy:
