@@ -1,3 +1,12 @@
 {$DOMAIN} {
-    reverse_proxy portainer:9000
+    # TLS/HTTPS is automatic
+    tls {$EMAIL}
+
+    handle_path /portainer/* {
+        reverse_proxy portainer:9000 {
+            header_up X-Forwarded-Prefix /portainer
+        }
+    }
+
+    redir / /portainer{uri}
 }
